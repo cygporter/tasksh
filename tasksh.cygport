@@ -1,0 +1,37 @@
+NAME=tasksh
+VERSION=1.2.0
+RELEASE=1
+CATEGORY=Office
+SUMMARY='A shell for Taskwarrior'
+DESCRIPTION='Tasksh is a shell for Taskwarrior'
+HOMEPAGE=https://github.com/GothenburgBitFactory/taskshell
+LICENSE=MIT
+
+# This tarball needs manually preparing:
+# - It must include the submodules, which are missing from the main upstream
+#   source package and can't be downloaded directly because the v1.2.0 tag in
+#   the upstream repository has the wrong submodule URL.
+# - It must include the .git directory, as that's used by the build process.
+SRC_URI=taskshell.tar.xz
+SRC_DIR=taskshell
+
+BUILD_REQUIRES=cmake
+
+inherit cmake
+
+src_compile () {
+	# Need to manually link the .git directory, as the build depends on it
+	# but lndirs skips it.
+	lndirs
+	ln -s "$S"/.git "$B"/.git
+	cd "$B"
+	cygcmake -DCMAKE_BUILD_TYPE=release -DTASK_DOCDIR=share/doc/tasksh .
+	cygmake
+}
+
+src_test () {
+	# Tests rely on Python2.7 and so are broken.  Don't run them.
+	:
+}
+
+# vim: set noexpandtab tabstop=8 listchars=tab\:\ \ ,trail\:-,lead\:-
